@@ -4,7 +4,7 @@ Toggle visibility of native MacOS window controls (aka the "traffic lights") in 
 
 ## Usage
 
-1. Set Obsidian window frame style ➡️ "Hidden (default)"
+1. Set Obsidian window frame style to "Hidden (default)"
 2. Install the plugin
 3. Open the command palette (⌘P)
 4. Search for "Traffic Control"
