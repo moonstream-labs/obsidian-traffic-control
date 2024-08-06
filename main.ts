@@ -1,52 +1,76 @@
 import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
 
 interface TrafficLightSettings {
-	visible: boolean;
-	tabHeaderShift: boolean;
+	active: boolean;
 }
 
 const DEFAULT_SETTINGS: TrafficLightSettings = {
-	visible: true,
-	tabHeaderShift: false,
+	active: false,
 };
 
 export default class TrafficControl extends Plugin {
 	settings: TrafficLightSettings;
 
-	tabHeader: HTMLElement | null = document.querySelector(
-		".workspace-tabs.mod-top-left-space .workspace-tab-header-container",
-	);
+	async hideTrafficLights() {
+		const tabHeader = document.querySelector(
+			".mod-top-left-space .workspace-tab-header-container",
+		);
 
-	hideTrafficLights = async () => {
 		window
 			.require("electron")
 			.remote.getCurrentWindow()
 			.setWindowButtonVisibility(false);
-		this.settings.visible = false;
-		this.settings.tabHeaderShift = true;
-		if (this.tabHeader !== null) {
-			this.tabHeader.classList.add("traffic-control");
+		if (tabHeader && !tabHeader.classList.contains("traffic-control")) {
+			tabHeader.classList.add("traffic-control");
 		}
+		this.settings.active = true;
 		await this.saveSettings();
-	};
+	}
 
-	showTrafficLights = async () => {
+	async showTrafficLights() {
+		const tabHeader = document.querySelector(
+			".mod-top-left-space .workspace-tab-header-container",
+		);
+
 		window
 			.require("electron")
 			.remote.getCurrentWindow()
 			.setWindowButtonVisibility(true);
-		this.settings.visible = true;
-		this.settings.tabHeaderShift = false;
-		if (this.tabHeader !== null) {
-			this.tabHeader.classList.remove("traffic-control");
+		if (tabHeader?.classList.contains("traffic-control")) {
+			tabHeader.classList.remove("traffic-control");
 		}
+		this.settings.active = false;
 		await this.saveSettings();
-	};
+	}
 
 	async onload() {
+		console.log("Loading 🚥 Traffic Control");
 		await this.loadSettings();
 
-		if (!this.settings.visible && this.tabHeader !== null) {
+		// This adds a settings tab so the user can configure various aspects of the plugin
+		this.addSettingTab(new TrafficLightSettingTab(this.app, this));
+
+		this.loadRules();
+
+		const classCheck = () => {
+			const leftSidebar = document.querySelector(".mod-left-split");
+			if (leftSidebar) {
+				const containerEl = leftSidebar.querySelector(
+					".workspace-tab-header-container",
+				);
+				if (containerEl) {
+					if (this.settings.active) {
+						containerEl.classList.add("traffic-control");
+					}
+				}
+			}
+		};
+
+		this.app.workspace.onLayoutReady(() => {
+			classCheck();
+		});
+
+		if (this.settings.active) {
 			await this.hideTrafficLights();
 		}
 
@@ -54,14 +78,12 @@ export default class TrafficControl extends Plugin {
 			id: "show-traffic-lights",
 			name: "Show",
 			checkCallback: (checking: boolean) => {
-				if (!this.settings.visible) {
+				if (this.settings.active) {
 					if (!checking) {
 						this.showTrafficLights();
-						this.saveSettings();
 					}
 					return true;
 				}
-				return false;
 			},
 		});
 
@@ -69,26 +91,19 @@ export default class TrafficControl extends Plugin {
 			id: "hide-traffic-lights",
 			name: "Hide",
 			checkCallback: (checking: boolean) => {
-				if (this.settings.visible) {
+				if (!this.settings.active) {
 					if (!checking) {
 						this.hideTrafficLights();
-						this.saveSettings();
 					}
 					return true;
 				}
-				return false;
 			},
 		});
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new TrafficLightSettingTab(this.app, this));
 	}
 
 	async onunload() {
-		if (this.settings.visible && this.tabHeader !== null) {
-			this.showTrafficLights();
-			await this.saveSettings();
-		}
+		console.log("Unloading 🚥 Traffic Control");
+		this.unloadRules();
 	}
 
 	async loadSettings() {
@@ -97,6 +112,29 @@ export default class TrafficControl extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	// add the styling elements we need
+	loadRules() {
+		// add a css block for our settings-dependent styles
+		const css = document.createElement("style");
+		css.id = "traffic-control";
+		document.getElementsByTagName("head")[0].appendChild(css);
+
+		// add the main class
+		document.body.classList.add("traffic-control");
+	}
+
+	unloadRules() {
+		if (this.settings.active) {
+			this.showTrafficLights();
+		}
+
+		const styleElement = document.getElementById("traffic-control");
+		if (styleElement) {
+			styleElement.parentNode?.removeChild(styleElement);
+		}
+		document.body.classList.remove("traffic-control");
 	}
 }
 
@@ -116,16 +154,13 @@ class TrafficLightSettingTab extends PluginSettingTab {
 			.setName("🚥 Traffic Control")
 			.setDesc("Show/Hide Native macOS Window Controls")
 			.addToggle((toggle) =>
-				toggle
-					.setValue(this.plugin.settings.visible)
-					.onChange(async (value) => {
-						if (value) {
-							this.plugin.showTrafficLights();
-						} else {
-							this.plugin.hideTrafficLights();
-						}
-						await this.plugin.saveSettings();
-					}),
+				toggle.setValue(this.plugin.settings.active).onChange(async (value) => {
+					if (!value) {
+						this.plugin.showTrafficLights();
+					} else {
+						this.plugin.hideTrafficLights();
+					}
+				}),
 			);
 	}
 }

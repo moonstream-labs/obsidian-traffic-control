@@ -1,7 +1,7 @@
 {
 	"name": "traffic-control",
 	"version": "1.0.1",
-	"description": "Toggle visibility of native window controls in MacOS.",
+	"description": "Toggle visibility of native MacOS window controls in Obsidian.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

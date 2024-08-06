@@ -3,7 +3,7 @@
 	"name": "🚥 Traffic Control",
 	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Toggle visibility of native window controls in MacOS.",
+	"description": "Toggle visibility of native MacOS window controls in Obsidian.",
 	"author": "MoonStream Labs",
 	"authorUrl": "https://github.com/moonstream-labs",
 	"isDesktopOnly": true
