@@ -99,6 +99,17 @@ export default class TrafficControl extends Plugin {
 				}
 			},
 		});
+
+		this.addCommand({
+			id: "hide-new-window",
+			name: "Hide in New Window",
+			callback: () => {
+				window
+					.require("electron")
+					.remote.getCurrentWindow()
+					.setWindowButtonVisibility(false);
+			},
+		});
 	}
 
 	async onunload() {
