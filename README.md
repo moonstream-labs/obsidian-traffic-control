@@ -9,7 +9,6 @@ Traffic Control is an [Obsidian](https://obsidian.md) plugin that allows you to 
 - 🎛️ Toggle traffic light controls (close, minimize, maximize buttons) visibility
 - 🖥️ Works across all open Obsidian windows (and vaults!)
 - 🔄 Automatically applies to newly opened windows
-- 🧠 Persistently stores preference between sessions
 
 ## Installation
 
@@ -62,4 +61,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 > [!WARNING]
 > This plugin relies heavily on Electron APIs that are otherwise undocumented in the Obsidian API.
-> Though everything seems to be working fine as of 9/7/24, should something change in the future, it may suddenly stop working!
+> Though everything seems to be working as of 9/7/24, we are still ironing out the kinks!
