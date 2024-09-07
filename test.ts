@@ -1,4 +1,4 @@
-// main.ts
+// test.ts (w/ logs)
 
 import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
 import type { BrowserWindow } from "@electron/remote";
@@ -37,12 +37,19 @@ export default class TrafficControl extends Plugin {
 
 		this.registerEvent(
 			this.app.workspace.on("window-open", (win) => {
+				console.log("New window opened", win);
+				// Apply the current setting to all windows, including the new one
 				setTimeout(() => this.applyCurrentSetting(), 500);
 			}),
 		);
 
+		// Load CSS rules
 		this.loadRules();
+
+		// Apply the initial setting
 		this.applyCurrentSetting();
+
+		console.log("🚥 Traffic Control loaded");
 	}
 
 	async applyClassToAllWindows(addClass: boolean) {
@@ -95,6 +102,7 @@ export default class TrafficControl extends Plugin {
 
 	onunload() {
 		console.log("Unloading 🚥 Traffic Control");
+		// Ensure traffic lights are shown when the plugin is unloaded
 		this.showTrafficLights();
 		this.unloadRules();
 	}
@@ -107,10 +115,14 @@ export default class TrafficControl extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	// add the styling elements we need
 	loadRules() {
+		// add a css block for our settings-dependent styles
 		const css = document.createElement("style");
 		css.id = "traffic-control";
 		document.getElementsByTagName("head")[0].appendChild(css);
+
+		// add the main class
 		document.body.classList.add("traffic-control");
 	}
 
